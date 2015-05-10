@@ -44,7 +44,7 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(std::ostream &buffer) const;
+  void Serialise(std::ostream& buffer) const;
 };
 
 /// simple message type
@@ -73,7 +73,7 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(std::ostream &buffer) const;
+  void Serialise(std::ostream& buffer) const;
 };
 
 #endif // MESSAGES_H
