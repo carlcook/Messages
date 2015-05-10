@@ -1,6 +1,37 @@
 #include "messages.h"
 
+#include <memory.h>
 #include <iostream>
+
+// TODO what's the correct order of includes here?
+
+/// internal enum to identify unique messages
+enum class MessageType
+{
+  TraderKeyLogin,
+  OrderInsert
+};
+
+/// auto generated serialisation routines
+namespace {
+
+template<typename T>
+void Write(char*& buffer, const T& value)
+{
+    memcpy(buffer, &value, sizeof(T));
+    buffer += sizeof(T);
+}
+
+template<>
+void Write(char*& buffer, const std::string& value)
+{
+    static constexpr size_t ALIGNMENT = 4; // bytes
+    memcpy(buffer, value.data(), value.size());
+    const auto alignedSize = (value.size() + 1 /*nullchar*/ + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1);
+    buffer += alignedSize;
+}
+
+}
 
 const std::string& TraderKeyLoginMessage::GetTraderName() const
 {
@@ -32,31 +63,13 @@ void TraderKeyLoginMessage::SetFooFactor(float value)
   mFooFactor = value;
 }
 
-uint32_t TraderKeyLoginMessage::GetMessageType() const
+void TraderKeyLoginMessage::Serialise(char*& buffer) const
 {
-  return static_cast<uint32_t>(MessageType::TraderKeyLogin);
+  Write(buffer, MessageType::TraderKeyLogin);
+  Write(buffer, mTraderName);
+  Write(buffer, mTraderIndex);
+  Write(buffer, mFooFactor);
 }
-
-void TraderKeyLoginMessage::Serialise(std::ostream& buffer) const
-{
-  buffer << mTraderName;
-  buffer << (int)mTraderIndex;
-  buffer << mFooFactor;
-}
-
-// TODO find a way to not have to use ints
-// Maybe just write to the buffer directly?
-uint32_t OrderInsertMessage::GetMessageType() const
-{
-  return static_cast<uint32_t>(MessageType::OrderInsert);
-}
-
-void OrderInsertMessage::Serialise(std::ostream& buffer) const
-{
-  buffer << mVolume;
-  buffer << mPrice;
-}
-
 
 uint32_t OrderInsertMessage::GetVolume() const
 {
@@ -76,4 +89,11 @@ double OrderInsertMessage::GetPrice() const
 void OrderInsertMessage::SetPrice(double value)
 {
   mPrice = value;
+}
+
+void OrderInsertMessage::Serialise(char*& buffer) const
+{
+  Write(buffer, MessageType::OrderInsert);
+  Write(buffer, mVolume);
+  Write(buffer, mPrice);
 }

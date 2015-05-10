@@ -3,17 +3,6 @@
 
 #include <string>
 
-/// internal enum to identify unique messages
-enum class MessageType
-{
-  TraderKeyLogin,
-  OrderInsert
-};
-
-/// messages require the following methods:
-/// void Serialise(std::ostream&)
-/// uint32_t GetMessageType()
-
 /// simple message type
 class TraderKeyLoginMessage final
 {
@@ -44,7 +33,7 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(std::ostream& buffer) const;
+  void Serialise(char *&buffer) const;
 };
 
 /// simple message type
@@ -73,7 +62,7 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(std::ostream& buffer) const;
+  void Serialise(char *&buffer) const;
 };
 
 #endif // MESSAGES_H
