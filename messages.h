@@ -1,19 +1,25 @@
 #ifndef MESSAGES_H
 #define MESSAGES_H
 
-#include "filebuffer.h"
+#include <string>
 
+/// internal enum to identify unique messages
 enum class MessageType
 {
   TraderKeyLogin,
   OrderInsert
 };
 
+/// messages require the following methods:
+/// void Serialise(std::ostream&)
+/// uint32_t GetMessageType()
+
+/// simple message type
 class TraderKeyLoginMessage final
 {
 private:
   std::string mTraderName;
-  uint32_t mTraderIndex = 0;
+  unsigned int mTraderIndex = 0;
   float mFooFactor = 0;
 
 public:
@@ -38,9 +44,10 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(FileBuffer& buffer) const;
+  void Serialise(std::ostream &buffer) const;
 };
 
+/// simple message type
 class OrderInsertMessage final
 {
 private:
@@ -66,8 +73,7 @@ public:
   uint32_t GetMessageType() const;
 
   /// Serialisation routine
-  void Serialise(FileBuffer& buffer) const;
+  void Serialise(std::ostream &buffer) const;
 };
-
 
 #endif // MESSAGES_H

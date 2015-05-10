@@ -1,5 +1,7 @@
 #include "messages.h"
 
+#include <iostream>
+
 const std::string& TraderKeyLoginMessage::GetTraderName() const
 {
   return mTraderName;
@@ -35,19 +37,21 @@ uint32_t TraderKeyLoginMessage::GetMessageType() const
   return static_cast<uint32_t>(MessageType::TraderKeyLogin);
 }
 
-void TraderKeyLoginMessage::Serialise(FileBuffer& buffer) const
+void TraderKeyLoginMessage::Serialise(std::ostream& buffer) const
 {
   buffer << mTraderName;
-  buffer << mTraderIndex;
+  buffer << (int)mTraderIndex;
   buffer << mFooFactor;
 }
 
+// TODO find a way to not have to use ints
+// Maybe just write to the buffer directly?
 uint32_t OrderInsertMessage::GetMessageType() const
 {
   return static_cast<uint32_t>(MessageType::OrderInsert);
 }
 
-void OrderInsertMessage::Serialise(FileBuffer& buffer) const
+void OrderInsertMessage::Serialise(std::ostream& buffer) const
 {
   buffer << mVolume;
   buffer << mPrice;
