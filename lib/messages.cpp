@@ -1,7 +1,7 @@
 #include "messages.h"
 
 #include <memory.h>
-#include <iostream>
+#include <sstream>
 
 // TODO what's the correct order of includes here?
 
@@ -71,6 +71,15 @@ void TraderKeyLoginMessage::Serialise(char*& buffer) const
   Write(buffer, mFooFactor);
 }
 
+std::string TraderKeyLoginMessage::GenerateLogMessage() const
+{
+  std::ostringstream logMessage;
+  logMessage << "Trader key login, trader: " << mTraderName;
+  logMessage << ", index: " << mTraderIndex;
+  logMessage << ", Foo: " << mFooFactor;
+  return logMessage.str();
+}
+
 uint32_t OrderInsertMessage::GetVolume() const
 {
   return mVolume;
@@ -96,4 +105,12 @@ void OrderInsertMessage::Serialise(char*& buffer) const
   Write(buffer, MessageType::OrderInsert);
   Write(buffer, mVolume);
   Write(buffer, mPrice);
+}
+
+std::string OrderInsertMessage::GenerateLogMessage() const
+{
+  std::ostringstream logMessage;
+  logMessage << "Order inserted, volume: " << mVolume;
+  logMessage << ", price: " << mPrice;
+  return logMessage.str();
 }

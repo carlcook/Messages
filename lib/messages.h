@@ -34,6 +34,9 @@ public:
 
   /// Serialisation routine
   void Serialise(char *&buffer) const;
+
+  /// Extraction routine
+  std::string GenerateLogMessage() const;
 };
 
 /// simple message type
@@ -63,6 +66,9 @@ public:
 
   /// Serialisation routine
   void Serialise(char *&buffer) const;
+
+  /// Extraction routine
+  std::string GenerateLogMessage() const;
 };
 
 #endif // MESSAGES_H
