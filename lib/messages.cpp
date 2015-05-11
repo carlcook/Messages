@@ -5,43 +5,57 @@
 
 // TODO what's the correct order of includes here?
 
-// TODO use version from utils.h (but this will need to go somewhere common to all projects)
 namespace
 {
+  // TODO use version from utils.h (but this will need to go somewhere common to all projects)
+  template <typename T, typename... Ts>
+  std::unique_ptr<T> make_unique(Ts&&... params)
+  {
+    return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+  }
 
-template <typename T, typename... Ts>
-std::unique_ptr<T> make_unique(Ts&&... params)
-{
-  return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
-}
+  /// internal enum to identify unique messages
+  enum class MessageType
+  {
+    TraderKeyLogin,
+    OrderInsert
+  };
 
-}
-/// internal enum to identify unique messages
-enum class MessageType
-{
-  TraderKeyLogin,
-  OrderInsert
-};
+  constexpr size_t ALIGNMENT = 4; // bytes
 
-/// auto generated serialisation routines
-namespace {
+  constexpr size_t GetAlignedSize(const size_t unalignedSize)
+  {
+    return (unalignedSize + ALIGNMENT - 1) & ~(ALIGNMENT - 1);
+  }
 
-template<typename T>
-void Write(char*& buffer, const T& value)
-{
+  /// "auto generated" serialisation routines
+  template<typename T>
+  void Write(char*& buffer, const T& value)
+  {
     memcpy(buffer, &value, sizeof(T));
     buffer += sizeof(T);
-}
+  }
 
-template<>
-void Write(char*& buffer, const std::string& value)
-{
-    static constexpr size_t ALIGNMENT = 4; // bytes
+  template<>
+  void Write(char*& buffer, const std::string& value)
+  {
     memcpy(buffer, value.data(), value.size());
-    const auto alignedSize = (value.size() + 1 /*nullchar*/ + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1);
-    buffer += alignedSize;
-}
+    buffer += GetAlignedSize(value.size() + 1 /*nullchar*/);
+  }
 
+  template<typename T>
+  void Read(const char*& buffer, T& value)
+  {
+    memcpy(&value, buffer, sizeof(T));
+    buffer += sizeof(T);
+  }
+
+  template<>
+  void Read(const char*& buffer, std::string& value)
+  {
+    value.assign(buffer);
+    buffer += GetAlignedSize(value.size() + 1 /*nullchar*/);
+  }
 }
 
 const std::string& TraderKeyLoginMessage::GetTraderName() const
@@ -82,9 +96,11 @@ void TraderKeyLoginMessage::Serialise(char*& buffer) const
   Write(buffer, mFooFactor);
 }
 
-void TraderKeyLoginMessage::Deserialise(char *buffer)
+void TraderKeyLoginMessage::Deserialise(const char *& buffer)
 {
-  // TODO: read each field back in and set
+  Read(buffer, mTraderName);
+  Read(buffer, mTraderIndex);
+  Read(buffer, mFooFactor);
 }
 
 std::string TraderKeyLoginMessage::GenerateLogMessage() const
@@ -123,9 +139,10 @@ void OrderInsertMessage::Serialise(char*& buffer) const
   Write(buffer, mPrice);
 }
 
-void OrderInsertMessage::Deserialise(char *buffer)
+void OrderInsertMessage::Deserialise(const char *& buffer)
 {
-  // TODO: read each field back in and set
+  Read(buffer, mVolume);
+  Read(buffer, mPrice);
 }
 
 std::string OrderInsertMessage::GenerateLogMessage() const

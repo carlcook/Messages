@@ -10,7 +10,7 @@ public:
   virtual ~IMessage() = default;
 
   /// Deserialisation routine
-  virtual void Deserialise(char * buffer) = 0;
+  virtual void Deserialise(const char*& buffer) = 0;
 
   /// Extraction routine
   virtual std::string GenerateLogMessage() const = 0;
@@ -46,7 +46,7 @@ public:
   void Serialise(char *&buffer) const;
 
   /// Deserialisation routine
-  void Deserialise(char * buffer) override;
+  void Deserialise(const char*& buffer) override;
 
   /// Extraction routine
   std::string GenerateLogMessage() const override;
@@ -78,7 +78,7 @@ public:
   void Serialise(char *&buffer) const;
 
   /// Deserialisation routine
-  void Deserialise(char * buffer) override;
+  void Deserialise(const char*& buffer) override;
 
   /// Extraction routine
   std::string GenerateLogMessage() const override;
