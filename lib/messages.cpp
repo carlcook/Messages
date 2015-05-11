@@ -5,6 +5,17 @@
 
 // TODO what's the correct order of includes here?
 
+// TODO use version from utils.h (but this will need to go somewhere common to all projects)
+namespace
+{
+
+template <typename T, typename... Ts>
+std::unique_ptr<T> make_unique(Ts&&... params)
+{
+  return std::unique_ptr<T>(new T(std::forward<Ts>(params)...));
+}
+
+}
 /// internal enum to identify unique messages
 enum class MessageType
 {
@@ -71,6 +82,11 @@ void TraderKeyLoginMessage::Serialise(char*& buffer) const
   Write(buffer, mFooFactor);
 }
 
+void TraderKeyLoginMessage::Deserialise(char *buffer)
+{
+  // TODO: read each field back in and set
+}
+
 std::string TraderKeyLoginMessage::GenerateLogMessage() const
 {
   std::ostringstream logMessage;
@@ -107,10 +123,26 @@ void OrderInsertMessage::Serialise(char*& buffer) const
   Write(buffer, mPrice);
 }
 
+void OrderInsertMessage::Deserialise(char *buffer)
+{
+  // TODO: read each field back in and set
+}
+
 std::string OrderInsertMessage::GenerateLogMessage() const
 {
   std::ostringstream logMessage;
   logMessage << "Order inserted, volume: " << mVolume;
   logMessage << ", price: " << mPrice;
   return logMessage.str();
+}
+
+std::unique_ptr<IMessage> CreateMessage(const int messageId)
+{
+  switch (static_cast<MessageType>(messageId))
+  {
+    case MessageType::OrderInsert:
+      return make_unique<OrderInsertMessage>();
+    case MessageType::TraderKeyLogin:
+      return make_unique<TraderKeyLoginMessage>();
+  }
 }

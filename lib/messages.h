@@ -2,9 +2,22 @@
 #define MESSAGES_H
 
 #include <string>
+#include <memory>
+
+class IMessage
+{
+public:
+  virtual ~IMessage() = default;
+
+  /// Deserialisation routine
+  virtual void Deserialise(char * buffer) = 0;
+
+  /// Extraction routine
+  virtual std::string GenerateLogMessage() const = 0;
+};
 
 /// simple message type
-class TraderKeyLoginMessage final
+class TraderKeyLoginMessage final : public IMessage
 {
 private:
   std::string mTraderName;
@@ -29,18 +42,18 @@ public:
   float GetFooFactor() const;
   void SetFooFactor(float value);
 
-  /// Message type
-  uint32_t GetMessageType() const;
-
   /// Serialisation routine
   void Serialise(char *&buffer) const;
 
+  /// Deserialisation routine
+  void Deserialise(char * buffer) override;
+
   /// Extraction routine
-  std::string GenerateLogMessage() const;
+  std::string GenerateLogMessage() const override;
 };
 
 /// simple message type
-class OrderInsertMessage final
+class OrderInsertMessage final : public IMessage
 {
 private:
   uint32_t mVolume;
@@ -61,14 +74,17 @@ public:
   double GetPrice() const;
   void SetPrice(double value);
 
-  /// Message type
-  uint32_t GetMessageType() const;
-
   /// Serialisation routine
   void Serialise(char *&buffer) const;
 
+  /// Deserialisation routine
+  void Deserialise(char * buffer) override;
+
   /// Extraction routine
-  std::string GenerateLogMessage() const;
+  std::string GenerateLogMessage() const override;
 };
+
+/// Message factory
+std::unique_ptr<IMessage> CreateMessage(const int messageId);
 
 #endif // MESSAGES_H
